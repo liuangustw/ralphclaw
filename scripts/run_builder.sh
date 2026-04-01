@@ -54,43 +54,22 @@ echo "== Running builder with minimal context =="
   fi
 } > /tmp/builder_prompt_bundle.txt
 
-# Ralph-Claw Builder: Minimal context code generation
-# The prompt bundle is prepared above. Now we need Candice (OpenClaw Claude) to process it.
-echo "== Sending to OpenClaw builder session =="
+# Ralph-Claw Builder: Call Gemini API (Free Tier 2)
+echo "== Calling Gemini Builder API =="
 
-# Write marker for Candice to pick up
-mkdir -p /tmp/ralphclaw-handoff
-cp /tmp/builder_prompt_bundle.txt /tmp/ralphclaw-handoff/builder_input_$(date +%s).txt
+GEMINI_KEY="${GEMINI_API_KEYS_FREE_TIER_2:-$GEMINI_API_KEY}"
 
-# Tell Candice what to do
-echo "Ralph-Claw needs builder to process: $CURRENT_TASK"
-echo "Prompt bundle is ready in /tmp/builder_prompt_bundle.txt"
-echo "Expected output format:"
-echo "  APPLY_PATCH:"
-echo "  <unified diff here>"
-echo "  END_PATCH"
+if [ -z "$GEMINI_KEY" ]; then
+  echo "Error: GEMINI_API_KEYS_FREE_TIER_2 or GEMINI_API_KEY not set" >&2
+  exit 1
+fi
 
-# For now: placeholder that demonstrates what a real response would look like
-cat > "$RAW_OUTPUT" << 'DEMO'
-[Builder processing task...]
-
-The builder has reviewed the minimal context and task.
-To complete this integration, Candice needs to:
-1. Read /tmp/builder_prompt_bundle.txt
-2. Generate code as per the task
-3. Format as unified diff
-4. Output APPLY_PATCH: ... END_PATCH
-
-APPLY_PATCH:
---- a/app/utils/text.py
-+++ b/app/utils/text.py
-@@ -1 +1,5 @@
-+def normalize_spaces(text: str) -> str:
-+    return " ".join(text.split())
-+
-+def slugify_title(text: str) -> str:
-+    return "-".join(text.strip().lower().split())
-DEMO
+# Call Gemini with the prompt bundle
+python3 scripts/call_gemini.py \
+  --role builder \
+  --key "$GEMINI_KEY" \
+  --input /tmp/builder_prompt_bundle.txt \
+  --output "$RAW_OUTPUT" 2>&1 | head -5
 
 echo "== Extracting patch from builder output =="
 

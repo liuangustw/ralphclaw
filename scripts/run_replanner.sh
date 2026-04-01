@@ -44,10 +44,22 @@ for f in artifacts/test.out artifacts/build.out artifacts/lint.out artifacts/run
   fi
 done
 
-# TODO: replace this placeholder with your real replanner agent call
-# Example idea:
-# openclaw run agent replanner --input /tmp/replanner_prompt.txt > "$RAW_OUTPUT"
-echo "{}" > "$RAW_OUTPUT"
+# Ralph-Claw Replanner: Call Gemini API (Free Tier 3)
+echo "== Calling Gemini Replanner API =="
+
+GEMINI_KEY="${GEMINI_API_KEYS_FREE_TIER_3:-$GEMINI_API_KEY}"
+
+if [ -z "$GEMINI_KEY" ]; then
+  echo "Error: GEMINI_API_KEYS_FREE_TIER_3 or GEMINI_API_KEY not set" >&2
+  exit 1
+fi
+
+# Call Gemini with the replanner prompt
+python3 scripts/call_gemini.py \
+  --role replanner \
+  --key "$GEMINI_KEY" \
+  --input /tmp/replanner_prompt.txt \
+  --output "$RAW_OUTPUT" 2>&1 | head -5
 echo "ERROR: replace placeholder replanner agent call in scripts/run_replanner.sh" >&2
 
 cp "$RAW_OUTPUT" "$PROPOSAL_FILE"
