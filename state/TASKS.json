@@ -1,122 +1,131 @@
 {
-  "project_id": "demo_slugify_project",
-  "goal": "Add slugify_title utility and make all related tests pass",
-  "project_summary": "Small Python project with utility helpers and pytest-based tests.",
-  "global_constraints": [
-    "Do not modify CI config",
-    "Do not add new dependencies",
-    "Keep changes minimal and local"
-  ],
-  "budget": {
-    "max_total_iterations": 20,
-    "max_total_replans": 3,
-    "max_total_cost_usd": 3
-  },
+  "project_title": "Amazon Product Monitor",
+  "project_description": "Monitor Amazon marketplace for trending products by scraping seller pages and analyzing sales velocity signals",
   "tasks": [
     {
-      "id": "task_001",
-      "title": "Implement slugify_title utility",
-      "description": "Add slugify_title(text: str) in app/utils/text.py to normalize text into URL-safe slug format.",
-      "status": "done",
-      "priority": 1,
-      "depends_on": [],
-      "allowed_files": [
-        "app/utils/text.py",
-        "tests/test_text_utils.py"
-      ],
-      "forbidden_files": [
-        ".github/**",
-        "infra/**",
-        ".env",
-        "requirements.txt"
-      ],
+      "task_id": "amz_001",
+      "title": "Setup project structure and dependencies",
+      "description": "Create Python project skeleton with required dependencies (requests, beautifulsoup4, selenium optional), config management, logging",
+      "status": "ready",
+      "allowed_files": ["app/__init__.py", "app/config.py", "requirements.txt", "setup.py", "README.md"],
+      "forbidden_files": [],
       "acceptance": [
         {
           "id": "acc_001",
-          "description": "slugify_title exists in app/utils/text.py",
+          "description": "requirements.txt lists all needed packages",
           "type": "file_check",
-          "expected": "function slugify_title is defined",
-          "required": true
-        },
-        {
-          "id": "acc_002",
-          "description": "New slugify tests pass",
-          "type": "test",
-          "command": "pytest tests/test_text_utils.py -q",
+          "command": "grep -E 'requests|beautifulsoup4' requirements.txt",
+          "expected": "0",
           "required": true
         }
       ],
-      "test_commands": [
-        "pytest tests/test_text_utils.py -q"
-      ],
-      "rollback_hint": "Revert only changes in app/utils/text.py and tests/test_text_utils.py",
-      "notes": "Slug should be lowercase, hyphen-separated, and trim repeated separators.",
-      "retry_count": 1,
-      "max_retries": 3,
-      "last_failure_reason": null,
-      "failure_history": [
-        {
-          "timestamp": "2026-04-01T11:57:55Z",
-          "failure_type": "test_failure",
-          "summary": "One or more task test commands failed",
-          "root_cause_guess": "One or more task test commands failed"
-        },
-        {
-          "timestamp": "2026-04-01T11:58:22Z",
-          "failure_type": "scope_violation",
-          "summary": "Patch modified files outside allowed_files",
-          "root_cause_guess": "Patch modified files outside allowed_files"
-        }
-      ],
-      "output_artifacts": [
-        "artifacts/last_patch.diff",
-        "artifacts/test.out"
-      ]
+      "test_commands": ["python3 -m pip install -r requirements.txt"],
+      "max_retries": 2
     },
     {
-      "id": "task_002",
-      "title": "Run broader utility regression test",
-      "description": "Verify that adding slugify_title does not break other utility helpers.",
-      "status": "ready",
-      "priority": 2,
-      "depends_on": [
-        "task_001"
+      "task_id": "amz_002",
+      "title": "Implement Amazon URL parser and basic scraper",
+      "description": "Create module to parse Amazon seller pages, extract product URLs, handle pagination. Use requests + BeautifulSoup",
+      "status": "pending",
+      "depends_on": ["amz_001"],
+      "allowed_files": ["app/scraper.py", "tests/test_scraper.py"],
+      "forbidden_files": [],
+      "acceptance": [
+        {
+          "id": "acc_002",
+          "description": "Scraper can extract product info from sample HTML",
+          "type": "test",
+          "command": "python3 -m pytest tests/test_scraper.py::test_parse_product_page -v",
+          "expected": "PASSED",
+          "required": true
+        }
       ],
-      "allowed_files": [
-        "tests/test_text_utils.py"
-      ],
-      "forbidden_files": [
-        ".github/**",
-        "infra/**",
-        ".env",
-        "requirements.txt"
-      ],
+      "test_commands": ["python3 -m pytest tests/test_scraper.py -v"],
+      "max_retries": 3
+    },
+    {
+      "task_id": "amz_003",
+      "title": "Extract product listing and trending signals",
+      "description": "Parse product listings to extract: title, price, rating, review count, availability. Detect trending signals (fast reviews, price drops)",
+      "status": "pending",
+      "depends_on": ["amz_002"],
+      "allowed_files": ["app/product_analyzer.py", "tests/test_analyzer.py"],
+      "forbidden_files": [],
       "acceptance": [
         {
           "id": "acc_003",
-          "description": "All utility tests pass",
+          "description": "Analyzer identifies trending products with >10 reviews in <7 days",
           "type": "test",
-          "command": "pytest tests/test_text_utils.py tests/test_helpers.py -q",
+          "command": "python3 -m pytest tests/test_analyzer.py::test_detect_trending -v",
+          "expected": "PASSED",
           "required": true
         }
       ],
-      "test_commands": [
-        "pytest tests/test_text_utils.py tests/test_helpers.py -q"
+      "test_commands": ["python3 -m pytest tests/test_analyzer.py -v"],
+      "max_retries": 3
+    },
+    {
+      "task_id": "amz_004",
+      "title": "Database storage (SQLite) for products and history",
+      "description": "Create SQLite schema to store: product info, timestamps, price history, trending scores. Implement CRUD operations",
+      "status": "pending",
+      "depends_on": ["amz_001"],
+      "allowed_files": ["app/database.py", "app/models.py", "tests/test_database.py"],
+      "forbidden_files": [],
+      "acceptance": [
+        {
+          "id": "acc_004",
+          "description": "Database stores and retrieves products correctly",
+          "type": "test",
+          "command": "python3 -m pytest tests/test_database.py -v",
+          "expected": "PASSED",
+          "required": true
+        }
       ],
-      "rollback_hint": "No production file changes should be needed here unless task is replanned.",
-      "notes": "This is a verification-oriented task and should stay small.",
-      "retry_count": 0,
-      "max_retries": 2,
-      "last_failure_reason": null,
-      "failure_history": [],
-      "output_artifacts": [
-        "artifacts/test.out"
-      ]
+      "test_commands": ["python3 -m pytest tests/test_database.py -v"],
+      "max_retries": 2
+    },
+    {
+      "task_id": "amz_005",
+      "title": "Create CLI interface for monitoring",
+      "description": "Build command-line tool: 'monitor --seller-url <url> --output json/csv', shows top trending products with scores",
+      "status": "pending",
+      "depends_on": ["amz_002", "amz_003", "amz_004"],
+      "allowed_files": ["app/cli.py", "tests/test_cli.py"],
+      "forbidden_files": [],
+      "acceptance": [
+        {
+          "id": "acc_005",
+          "description": "CLI outputs JSON/CSV format correctly",
+          "type": "test",
+          "command": "python3 -m pytest tests/test_cli.py::test_output_json -v",
+          "expected": "PASSED",
+          "required": true
+        }
+      ],
+      "test_commands": ["python3 -m pytest tests/test_cli.py -v"],
+      "max_retries": 2
+    },
+    {
+      "task_id": "amz_006",
+      "title": "Implement scheduling for continuous monitoring",
+      "description": "Add APScheduler to run monitoring tasks at intervals (e.g., every 6 hours), store results with timestamps",
+      "status": "pending",
+      "depends_on": ["amz_005"],
+      "allowed_files": ["app/scheduler.py", "tests/test_scheduler.py"],
+      "forbidden_files": [],
+      "acceptance": [
+        {
+          "id": "acc_006",
+          "description": "Scheduler runs monitoring job on schedule",
+          "type": "test",
+          "command": "python3 -m pytest tests/test_scheduler.py::test_schedule_job -v",
+          "expected": "PASSED",
+          "required": true
+        }
+      ],
+      "test_commands": ["python3 -m pytest tests/test_scheduler.py -v"],
+      "max_retries": 2
     }
-  ],
-  "meta": {
-    "created_at": "2026-04-01T12:00:00Z",
-    "updated_at": "2026-04-01T12:39:14Z",
-    "version": "1.0"
-  }
+  ]
 }
