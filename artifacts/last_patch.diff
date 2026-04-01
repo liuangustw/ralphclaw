@@ -1,0 +1,11 @@
+diff --git a/app/utils/text.py b/app/utils/text.py
+index e69de29..1111111 100644
+--- a/app/utils/text.py
++++ b/app/utils/text.py
+@@ -1,2 +1,6 @@
+ def normalize_spaces(text: str) -> str:
+     return " ".join(text.split())
++
++
++def slugify_title(text: str) -> str:
++    return "-".join(text.strip().lower().split())

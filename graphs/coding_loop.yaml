@@ -1,0 +1,161 @@
+graph_id: coding_loop_v1_demo
+entrypoint: architect_select_task
+
+settings:
+  max_total_iterations: 20
+  max_task_retries_default: 3
+  max_replans: 3
+
+project:
+  name: demo_slugify_project
+  workspace_root: app/
+  state_root: state/
+  artifacts_root: artifacts/
+
+state_sources:
+  - state/TASKS.json
+  - state/CURRENT_TASK.json
+  - state/FAILURE_SUMMARY.json
+  - state/RUN_HISTORY.jsonl
+  - specs/product_spec.md
+  - specs/acceptance_tests.md
+
+nodes:
+  - id: architect_select_task
+    type: architect
+    description: Pick the next atomic task or re-scope if needed.
+    model: gpt-4.1
+    prompt_file: prompts/architect.md
+    inputs:
+      - state/TASKS.json
+      - state/FAILURE_SUMMARY.json
+      - specs/product_spec.md
+      - specs/acceptance_tests.md
+    outputs:
+      - state/CURRENT_TASK.json
+      - state/RUN_HISTORY.jsonl
+    transition:
+      on_success: builder_execute
+      on_error: human_review
+
+  - id: builder_execute
+    type: builder
+    description: Make only the minimum code changes required by CURRENT_TASK.json.
+    model: gpt-4.1-mini
+    prompt_file: prompts/builder.md
+    inputs:
+      - state/CURRENT_TASK.json
+      - app/
+    outputs:
+      - app/
+      - artifacts/last_patch.diff
+      - artifacts/diff_summary.txt
+      - state/RUN_HISTORY.jsonl
+    transition:
+      on_success: verifier_check
+      on_error: architect_replan
+
+  - id: verifier_check
+    type: verifier
+    description: Validate scope, run tests, and produce structured result.
+    model: gpt-4.1-mini
+    prompt_file: prompts/verifier.md
+    inputs:
+      - state/CURRENT_TASK.json
+      - app/
+      - artifacts/last_patch.diff
+      - artifacts/diff_summary.txt
+    outputs:
+      - artifacts/test.out
+      - artifacts/lint.out
+      - artifacts/build.out
+      - artifacts/runtime.out
+      - state/FAILURE_SUMMARY.json
+      - state/RUN_HISTORY.jsonl
+    transition:
+      on_success: verify_switch
+      on_error: human_review
+
+  - id: verify_switch
+    type: switch
+    description: Route based on verifier result and retry budget.
+    conditions:
+      - when: failure_summary.status == "PASS"
+        goto: complete_task
+      - when: failure_summary.status == "FAIL" and current_task.retry_count < current_task.max_retries
+        goto: retry_task
+      - when: failure_summary.status == "FAIL" and current_task.retry_count >= current_task.max_retries
+        goto: architect_replan
+      - when: failure_summary.status == "ESCALATE"
+        goto: human_review
+
+  - id: retry_task
+    type: state_update
+    description: Increase retry counter and loop back to builder.
+    action: increment_retry_count
+    inputs:
+      - state/TASKS.json
+      - state/CURRENT_TASK.json
+      - state/FAILURE_SUMMARY.json
+    outputs:
+      - state/TASKS.json
+      - state/RUN_HISTORY.jsonl
+    transition:
+      on_success: builder_execute
+      on_error: human_review
+
+  - id: complete_task
+    type: state_update
+    description: Mark current task done and clear failure summary.
+    action: mark_task_done
+    inputs:
+      - state/TASKS.json
+      - state/CURRENT_TASK.json
+      - state/FAILURE_SUMMARY.json
+    outputs:
+      - state/TASKS.json
+      - state/FAILURE_SUMMARY.json
+      - state/RUN_HISTORY.jsonl
+    transition:
+      on_success: next_task_switch
+      on_error: human_review
+
+  - id: next_task_switch
+    type: switch
+    description: Continue if there are remaining tasks.
+    conditions:
+      - when: remaining_tasks_count > 0
+        goto: architect_select_task
+      - when: remaining_tasks_count == 0
+        goto: success_end
+
+  - id: architect_replan
+    type: architect
+    description: Re-scope the task when retries are exhausted or task is underspecified.
+    model: gpt-4.1
+    prompt_file: prompts/architect.md
+    inputs:
+      - state/TASKS.json
+      - state/CURRENT_TASK.json
+      - state/FAILURE_SUMMARY.json
+      - artifacts/test.out
+      - artifacts/build.out
+      - artifacts/lint.out
+      - artifacts/runtime.out
+    outputs:
+      - state/TASKS.json
+      - state/CURRENT_TASK.json
+      - state/RUN_HISTORY.jsonl
+    transition:
+      on_success: builder_execute
+      on_error: human_review
+
+  - id: human_review
+    type: terminal
+    status: blocked
+    description: Stop and request human intervention.
+
+  - id: success_end
+    type: terminal
+    status: success
+    description: All tasks completed successfully.

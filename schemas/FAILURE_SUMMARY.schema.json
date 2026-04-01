@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ralph-claw.local/schemas/FAILURE_SUMMARY.schema.json",
+  "title": "Ralph-Claw Failure Summary",
+  "type": "object",
+  "required": [
+    "task_id",
+    "status",
+    "failure_type",
+    "root_cause_guess",
+    "failed_checks",
+    "out_of_scope_edits",
+    "retry_recommended",
+    "escalate_recommended",
+    "timestamp"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^task_[0-9]{3,}$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAIL",
+        "ESCALATE"
+      ]
+    },
+    "failure_type": {
+      "type": "string",
+      "enum": [
+        "none",
+        "test_failure",
+        "lint_failure",
+        "build_failure",
+        "runtime_failure",
+        "scope_violation",
+        "spec_conflict",
+        "unknown"
+      ]
+    },
+    "root_cause_guess": {
+      "type": "string"
+    },
+    "failed_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "result",
+          "summary"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "out_of_scope_edits": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "retry_recommended": {
+      "type": "boolean"
+    },
+    "escalate_recommended": {
+      "type": "boolean"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

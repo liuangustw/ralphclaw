@@ -1,0 +1,122 @@
+{
+  "project_id": "demo_slugify_project",
+  "goal": "Add slugify_title utility and make all related tests pass",
+  "project_summary": "Small Python project with utility helpers and pytest-based tests.",
+  "global_constraints": [
+    "Do not modify CI config",
+    "Do not add new dependencies",
+    "Keep changes minimal and local"
+  ],
+  "budget": {
+    "max_total_iterations": 20,
+    "max_total_replans": 3,
+    "max_total_cost_usd": 3
+  },
+  "tasks": [
+    {
+      "id": "task_001",
+      "title": "Implement slugify_title utility",
+      "description": "Add slugify_title(text: str) in app/utils/text.py to normalize text into URL-safe slug format.",
+      "status": "blocked",
+      "priority": 1,
+      "depends_on": [],
+      "allowed_files": [
+        "app/utils/text.py",
+        "tests/test_text_utils.py"
+      ],
+      "forbidden_files": [
+        ".github/**",
+        "infra/**",
+        ".env",
+        "requirements.txt"
+      ],
+      "acceptance": [
+        {
+          "id": "acc_001",
+          "description": "slugify_title exists in app/utils/text.py",
+          "type": "file_check",
+          "expected": "function slugify_title is defined",
+          "required": true
+        },
+        {
+          "id": "acc_002",
+          "description": "New slugify tests pass",
+          "type": "test",
+          "command": "pytest tests/test_text_utils.py -q",
+          "required": true
+        }
+      ],
+      "test_commands": [
+        "pytest tests/test_text_utils.py -q"
+      ],
+      "rollback_hint": "Revert only changes in app/utils/text.py and tests/test_text_utils.py",
+      "notes": "Slug should be lowercase, hyphen-separated, and trim repeated separators.",
+      "retry_count": 1,
+      "max_retries": 3,
+      "last_failure_reason": "ESCALATE: Patch modified files outside allowed_files",
+      "failure_history": [
+        {
+          "timestamp": "2026-04-01T11:57:55Z",
+          "failure_type": "test_failure",
+          "summary": "One or more task test commands failed",
+          "root_cause_guess": "One or more task test commands failed"
+        },
+        {
+          "timestamp": "2026-04-01T11:58:22Z",
+          "failure_type": "scope_violation",
+          "summary": "Patch modified files outside allowed_files",
+          "root_cause_guess": "Patch modified files outside allowed_files"
+        }
+      ],
+      "output_artifacts": [
+        "artifacts/last_patch.diff",
+        "artifacts/test.out"
+      ]
+    },
+    {
+      "id": "task_002",
+      "title": "Run broader utility regression test",
+      "description": "Verify that adding slugify_title does not break other utility helpers.",
+      "status": "ready",
+      "priority": 2,
+      "depends_on": [
+        "task_001"
+      ],
+      "allowed_files": [
+        "tests/test_text_utils.py"
+      ],
+      "forbidden_files": [
+        ".github/**",
+        "infra/**",
+        ".env",
+        "requirements.txt"
+      ],
+      "acceptance": [
+        {
+          "id": "acc_003",
+          "description": "All utility tests pass",
+          "type": "test",
+          "command": "pytest tests/test_text_utils.py tests/test_helpers.py -q",
+          "required": true
+        }
+      ],
+      "test_commands": [
+        "pytest tests/test_text_utils.py tests/test_helpers.py -q"
+      ],
+      "rollback_hint": "No production file changes should be needed here unless task is replanned.",
+      "notes": "This is a verification-oriented task and should stay small.",
+      "retry_count": 0,
+      "max_retries": 2,
+      "last_failure_reason": null,
+      "failure_history": [],
+      "output_artifacts": [
+        "artifacts/test.out"
+      ]
+    }
+  ],
+  "meta": {
+    "created_at": "2026-04-01T12:00:00Z",
+    "updated_at": "2026-04-01T12:03:31Z",
+    "version": "1.0"
+  }
+}

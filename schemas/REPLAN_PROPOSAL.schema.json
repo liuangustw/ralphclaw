@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ralph-claw.local/schemas/REPLAN_PROPOSAL.schema.json",
+  "title": "Ralph-Claw Replan Proposal",
+  "type": "object",
+  "required": [
+    "parent_task_id",
+    "reason",
+    "strategy",
+    "replacement_tasks"
+  ],
+  "properties": {
+    "parent_task_id": {
+      "type": "string",
+      "pattern": "^task_[0-9]{3,}$"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "strategy": {
+      "type": "string",
+      "enum": [
+        "split",
+        "narrow_scope",
+        "verification_after_fix"
+      ]
+    },
+    "replacement_tasks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "allowed_files",
+          "forbidden_files",
+          "acceptance",
+          "test_commands"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 3
+          },
+          "description": {
+            "type": "string",
+            "minLength": 5
+          },
+          "allowed_files": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "forbidden_files": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "default": []
+          },
+          "acceptance": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "description",
+                "type"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "test",
+                    "lint",
+                    "build",
+                    "runtime",
+                    "file_check",
+                    "manual"
+                  ]
+                },
+                "command": {
+                  "type": "string"
+                },
+                "expected": {
+                  "type": "string"
+                },
+                "required": {
+                  "type": "boolean",
+                  "default": true
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "test_commands": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": []
+          },
+          "notes": {
+            "type": "string"
+          },
+          "max_retries": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 3
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

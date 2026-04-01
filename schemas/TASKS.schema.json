@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ralph-claw.local/schemas/TASKS.schema.json",
+  "title": "Ralph-Claw Tasks State",
+  "type": "object",
+  "required": [
+    "project_id",
+    "goal",
+    "tasks"
+  ],
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_summary": {
+      "type": "string"
+    },
+    "global_constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "budget": {
+      "type": "object",
+      "properties": {
+        "max_total_iterations": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_total_replans": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_total_cost_usd": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/task"
+      }
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "taskStatus": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "ready",
+        "in_progress",
+        "blocked",
+        "done",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "acceptanceCheck": {
+      "type": "object",
+      "required": [
+        "id",
+        "description",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "test",
+            "lint",
+            "build",
+            "runtime",
+            "file_check",
+            "manual"
+          ]
+        },
+        "command": {
+          "type": "string"
+        },
+        "expected": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "failureRecord": {
+      "type": "object",
+      "required": [
+        "timestamp",
+        "failure_type",
+        "summary"
+      ],
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "failure_type": {
+          "type": "string",
+          "enum": [
+            "test_failure",
+            "lint_failure",
+            "build_failure",
+            "runtime_failure",
+            "scope_violation",
+            "spec_conflict",
+            "unknown"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "root_cause_guess": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "task": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "description",
+        "status",
+        "depends_on",
+        "allowed_files",
+        "forbidden_files",
+        "acceptance",
+        "test_commands",
+        "retry_count",
+        "max_retries"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^task_[0-9]{3,}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 3
+        },
+        "description": {
+          "type": "string",
+          "minLength": 5
+        },
+        "status": {
+          "$ref": "#/$defs/taskStatus"
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 100
+        },
+        "depends_on": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^task_[0-9]{3,}$"
+          },
+          "default": []
+        },
+        "allowed_files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "forbidden_files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": []
+        },
+        "acceptance": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/acceptanceCheck"
+          }
+        },
+        "test_commands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "rollback_hint": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "retry_count": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "max_retries": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 3
+        },
+        "last_failure_reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "failure_history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/failureRecord"
+          },
+          "default": []
+        },
+        "output_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,5 @@
+PATCH_SCOPE_VIOLATION
+Changed files:
+  - app/utils/text.py
+Violations:
+  - app/utils/text.py
