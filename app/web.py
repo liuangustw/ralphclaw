@@ -22,21 +22,26 @@ scraper = AmazonScraper()
 
 @app.route('/')
 def index():
-    """Home page"""
-    trending = db.get_trending_products(limit=10)
-    return jsonify({
-        "status": "running",
-        "app": "Amazon Product Monitor",
-        "version": "1.0",
-        "trending_products": trending[:5] if trending else [],
-        "endpoints": {
-            "trending": "/api/trending?limit=20",
-            "monitor": "/api/monitor?url=<seller_url>",
-            "history": "/api/history?asin=<asin>",
-            "export": "/api/export?format=json&limit=50",
-            "status": "/api/status"
-        }
-    })
+    """Home page with HTML dashboard"""
+    from flask import send_from_directory
+    try:
+        return send_from_directory(str(PROJECT_ROOT / "templates"), "index.html")
+    except:
+        # Fallback to JSON
+        trending = db.get_trending_products(limit=10)
+        return jsonify({
+            "status": "running",
+            "app": "Amazon Product Monitor",
+            "version": "1.0",
+            "trending_products": trending[:5] if trending else [],
+            "endpoints": {
+                "trending": "/api/trending?limit=20",
+                "monitor": "/api/monitor?url=<seller_url>",
+                "history": "/api/history?asin=<asin>",
+                "export": "/api/export?format=json&limit=50",
+                "status": "/api/status"
+            }
+        })
 
 
 @app.route('/api/trending')
