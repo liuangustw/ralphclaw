@@ -1,11 +1,147 @@
-diff --git a/app/utils/text.py b/app/utils/text.py
-index e69de29..1111111 100644
---- a/app/utils/text.py
-+++ b/app/utils/text.py
-@@ -1,2 +1,6 @@
- def normalize_spaces(text: str) -> str:
-     return " ".join(text.split())
+--- /dev/null
++++ b/app/__init__.py
+@@ -0,0 +1 @@
++"""Amazon Product Monitor - CLI tool for discovering trending products"""
+
+--- /dev/null
++++ b/app/config.py
+@@ -0,0 +1,25 @@
++"""Configuration management for Amazon Product Monitor"""
 +
++import os
++from pathlib import Path
 +
-+def slugify_title(text: str) -> str:
-+    return "-".join(text.strip().lower().split())
++# Project root
++PROJECT_ROOT = Path(__file__).parent.parent
++DATA_DIR = PROJECT_ROOT / "data"
++DATA_DIR.mkdir(exist_ok=True)
++
++# Database
++DB_PATH = DATA_DIR / "products.db"
++
++# Scraping settings
++REQUEST_TIMEOUT = 10
++MAX_REQUESTS_PER_MINUTE = 5
++USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
++
++# API keys (from environment)
++OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
++
++# Logging
++LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
++LOG_FILE = DATA_DIR / "amazon_monitor.log"
+
+--- /dev/null
++++ b/requirements.txt
+@@ -0,0 +1,12 @@
++requests==2.31.0
++beautifulsoup4==4.12.2
++click==8.1.7
++sqlite3-python==1.0.0
++APScheduler==3.10.4
++pytest==7.4.3
++pytest-cov==4.1.0
++python-dotenv==1.0.0
++lxml==4.9.3
++aiohttp==3.9.1
++Faker==20.1.0
++jsonschema==4.20.0
+
+--- /dev/null
++++ b/setup.py
+@@ -0,0 +1,32 @@
++"""Setup script for Amazon Product Monitor"""
++
++from setuptools import setup, find_packages
++
++with open("README.md", "r", encoding="utf-8") as fh:
++    long_description = fh.read()
++
++setup(
++    name="amazon-product-monitor",
++    version="0.1.0",
++    author="Candice",
++    description="CLI tool to monitor and discover trending products on Amazon",
++    long_description=long_description,
++    long_description_content_type="text/markdown",
++    packages=find_packages(),
++    classifiers=[
++        "Programming Language :: Python :: 3",
++        "Programming Language :: Python :: 3.10",
++        "Programming Language :: Python :: 3.11",
++        "License :: OSI Approved :: MIT License",
++        "Operating System :: OS Independent",
++    ],
++    python_requires=">=3.10",
++    entry_points={
++        "console_scripts": [
++            "amazon-monitor=app.cli:main",
++        ],
++    },
++    install_requires=[
++        "requests>=2.31.0",
++        "beautifulsoup4>=4.12.0",
++    ],
++)
+
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,47 @@
++# Amazon Product Monitor
++
++A command-line tool to discover trending products on Amazon marketplace by monitoring seller pages and analyzing sales signals.
++
++## Features
++
++- **Web Scraping**: Extract product data from Amazon seller pages
++- **Trending Detection**: Identify products with high review velocity and momentum
++- **Data Storage**: SQLite database to track product history
++- **CLI Interface**: Easy-to-use command-line tool
++- **Scheduled Monitoring**: Automatic periodic monitoring with APScheduler
++- **Multiple Output Formats**: JSON and CSV export
++
++## Installation
++
++```bash
++git clone <repo-url>
++cd amazon-product-monitor
++pip install -r requirements.txt
++```
++
++## Usage
++
++### Monitor Amazon Seller Page
++```bash
++python3 -m app.cli --seller-url "https://amazon.com/s?i=merchant-xxx" --output json
++```
++
++### Export Trending Products
++```bash
++python3 -m app.cli --trending --since "2 days" --output csv
++```
++
++### Product History
++```bash
++python3 -m app.cli --export --product-id "B0XXXXXX" --output csv
++```
++
++## Project Structure
++
++```
++app/
++├── __init__.py        # Package initialization
++├── config.py          # Configuration settings
++├── scraper.py         # Web scraping module
++├── product_analyzer.py # Product analysis & trending detection
++├── database.py        # SQLite database operations
++├── cli.py             # Command-line interface
++└── scheduler.py       # Task scheduling
++```
++
++## Requirements
++
++- Python 3.10+
++- requests >= 2.31.0
++- beautifulsoup4 >= 4.12.0
++- click >= 8.1.0
++- APScheduler >= 3.10.0

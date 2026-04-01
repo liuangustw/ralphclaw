@@ -1,13 +1,20 @@
 {
-  "project_title": "Amazon Product Monitor",
-  "project_description": "Monitor Amazon marketplace for trending products by scraping seller pages and analyzing sales velocity signals",
+  "project_id": "amazon-monitor-v1",
+  "goal": "Build a command-line tool to discover trending products on Amazon marketplace by monitoring seller pages and analyzing sales signals",
   "tasks": [
     {
-      "task_id": "amz_001",
+      "id": "task_001",
       "title": "Setup project structure and dependencies",
       "description": "Create Python project skeleton with required dependencies (requests, beautifulsoup4, selenium optional), config management, logging",
-      "status": "ready",
-      "allowed_files": ["app/__init__.py", "app/config.py", "requirements.txt", "setup.py", "README.md"],
+      "status": "done",
+      "depends_on": [],
+      "allowed_files": [
+        "app/__init__.py",
+        "app/config.py",
+        "requirements.txt",
+        "setup.py",
+        "README.md"
+      ],
       "forbidden_files": [],
       "acceptance": [
         {
@@ -19,16 +26,25 @@
           "required": true
         }
       ],
-      "test_commands": ["python3 -m pip install -r requirements.txt"],
-      "max_retries": 2
+      "test_commands": [
+        "python3 -m pip install -r requirements.txt"
+      ],
+      "max_retries": 2,
+      "retry_count": 0,
+      "last_failure_reason": null
     },
     {
-      "task_id": "amz_002",
+      "id": "task_002",
       "title": "Implement Amazon URL parser and basic scraper",
       "description": "Create module to parse Amazon seller pages, extract product URLs, handle pagination. Use requests + BeautifulSoup",
       "status": "pending",
-      "depends_on": ["amz_001"],
-      "allowed_files": ["app/scraper.py", "tests/test_scraper.py"],
+      "depends_on": [
+        "task_001"
+      ],
+      "allowed_files": [
+        "app/scraper.py",
+        "tests/test_scraper.py"
+      ],
       "forbidden_files": [],
       "acceptance": [
         {
@@ -40,16 +56,24 @@
           "required": true
         }
       ],
-      "test_commands": ["python3 -m pytest tests/test_scraper.py -v"],
-      "max_retries": 3
+      "test_commands": [
+        "python3 -m pytest tests/test_scraper.py -v"
+      ],
+      "max_retries": 3,
+      "retry_count": 0
     },
     {
-      "task_id": "amz_003",
+      "id": "task_003",
       "title": "Extract product listing and trending signals",
       "description": "Parse product listings to extract: title, price, rating, review count, availability. Detect trending signals (fast reviews, price drops)",
       "status": "pending",
-      "depends_on": ["amz_002"],
-      "allowed_files": ["app/product_analyzer.py", "tests/test_analyzer.py"],
+      "depends_on": [
+        "task_002"
+      ],
+      "allowed_files": [
+        "app/product_analyzer.py",
+        "tests/test_analyzer.py"
+      ],
       "forbidden_files": [],
       "acceptance": [
         {
@@ -61,16 +85,25 @@
           "required": true
         }
       ],
-      "test_commands": ["python3 -m pytest tests/test_analyzer.py -v"],
-      "max_retries": 3
+      "test_commands": [
+        "python3 -m pytest tests/test_analyzer.py -v"
+      ],
+      "max_retries": 3,
+      "retry_count": 0
     },
     {
-      "task_id": "amz_004",
+      "id": "task_004",
       "title": "Database storage (SQLite) for products and history",
       "description": "Create SQLite schema to store: product info, timestamps, price history, trending scores. Implement CRUD operations",
       "status": "pending",
-      "depends_on": ["amz_001"],
-      "allowed_files": ["app/database.py", "app/models.py", "tests/test_database.py"],
+      "depends_on": [
+        "task_001"
+      ],
+      "allowed_files": [
+        "app/database.py",
+        "app/models.py",
+        "tests/test_database.py"
+      ],
       "forbidden_files": [],
       "acceptance": [
         {
@@ -82,16 +115,26 @@
           "required": true
         }
       ],
-      "test_commands": ["python3 -m pytest tests/test_database.py -v"],
-      "max_retries": 2
+      "test_commands": [
+        "python3 -m pytest tests/test_database.py -v"
+      ],
+      "max_retries": 2,
+      "retry_count": 0
     },
     {
-      "task_id": "amz_005",
+      "id": "task_005",
       "title": "Create CLI interface for monitoring",
       "description": "Build command-line tool: 'monitor --seller-url <url> --output json/csv', shows top trending products with scores",
       "status": "pending",
-      "depends_on": ["amz_002", "amz_003", "amz_004"],
-      "allowed_files": ["app/cli.py", "tests/test_cli.py"],
+      "depends_on": [
+        "task_002",
+        "task_003",
+        "task_004"
+      ],
+      "allowed_files": [
+        "app/cli.py",
+        "tests/test_cli.py"
+      ],
       "forbidden_files": [],
       "acceptance": [
         {
@@ -103,16 +146,24 @@
           "required": true
         }
       ],
-      "test_commands": ["python3 -m pytest tests/test_cli.py -v"],
-      "max_retries": 2
+      "test_commands": [
+        "python3 -m pytest tests/test_cli.py -v"
+      ],
+      "max_retries": 2,
+      "retry_count": 0
     },
     {
-      "task_id": "amz_006",
+      "id": "task_006",
       "title": "Implement scheduling for continuous monitoring",
       "description": "Add APScheduler to run monitoring tasks at intervals (e.g., every 6 hours), store results with timestamps",
       "status": "pending",
-      "depends_on": ["amz_005"],
-      "allowed_files": ["app/scheduler.py", "tests/test_scheduler.py"],
+      "depends_on": [
+        "task_005"
+      ],
+      "allowed_files": [
+        "app/scheduler.py",
+        "tests/test_scheduler.py"
+      ],
       "forbidden_files": [],
       "acceptance": [
         {
@@ -124,8 +175,14 @@
           "required": true
         }
       ],
-      "test_commands": ["python3 -m pytest tests/test_scheduler.py -v"],
-      "max_retries": 2
+      "test_commands": [
+        "python3 -m pytest tests/test_scheduler.py -v"
+      ],
+      "max_retries": 2,
+      "retry_count": 0
     }
-  ]
+  ],
+  "meta": {
+    "updated_at": "2026-04-01T13:02:43Z"
+  }
 }
