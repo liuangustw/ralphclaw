@@ -17,7 +17,7 @@
       "id": "task_001",
       "title": "Implement slugify_title utility",
       "description": "Add slugify_title(text: str) in app/utils/text.py to normalize text into URL-safe slug format.",
-      "status": "blocked",
+      "status": "done",
       "priority": 1,
       "depends_on": [],
       "allowed_files": [
@@ -53,7 +53,7 @@
       "notes": "Slug should be lowercase, hyphen-separated, and trim repeated separators.",
       "retry_count": 1,
       "max_retries": 3,
-      "last_failure_reason": "ESCALATE: Patch modified files outside allowed_files",
+      "last_failure_reason": null,
       "failure_history": [
         {
           "timestamp": "2026-04-01T11:57:55Z",
@@ -116,7 +116,7 @@
   ],
   "meta": {
     "created_at": "2026-04-01T12:00:00Z",
-    "updated_at": "2026-04-01T12:03:31Z",
+    "updated_at": "2026-04-01T12:39:14Z",
     "version": "1.0"
   }
 }

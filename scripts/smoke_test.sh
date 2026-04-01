@@ -3,10 +3,10 @@ set -euo pipefail
 
 echo "== Smoke test start =="
 
-python scripts/update_state.py validate_all
+python3 scripts/update_state.py validate_all
 
 echo "== Select next task =="
-python scripts/update_state.py select_next_ready_task > /tmp/current_task.json
+python3 scripts/update_state.py select_next_ready_task > /tmp/current_task.json
 cat /tmp/current_task.json
 
 echo "== Simulate builder output =="
@@ -41,13 +41,13 @@ STATUS=$(jq -r '.status' state/FAILURE_SUMMARY.json)
 
 if [ "$STATUS" = "PASS" ]; then
   echo "== Mark task done =="
-  python scripts/update_state.py mark_task_done --task-id task_001
+  python3 scripts/update_state.py mark_task_done --task-id task_001
 else
   echo "== Increment retry =="
-  python scripts/update_state.py increment_retry_count --task-id task_001
+  python3 scripts/update_state.py increment_retry_count --task-id task_001
 fi
 
 echo "== Remaining tasks =="
-python scripts/update_state.py remaining_tasks_count
+python3 scripts/update_state.py remaining_tasks_count
 
 echo "== Smoke test complete =="

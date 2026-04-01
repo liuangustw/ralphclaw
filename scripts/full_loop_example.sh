@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-python scripts/update_state.py select_next_ready_task >/dev/null
+python3 scripts/update_state.py select_next_ready_task >/dev/null
 
 CURRENT_TASK_ID=$(jq -r '.task_id // empty' state/CURRENT_TASK.json)
 if [ -z "$CURRENT_TASK_ID" ]; then

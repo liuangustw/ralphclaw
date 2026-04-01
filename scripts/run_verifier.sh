@@ -49,7 +49,7 @@ fi
 echo "== Run test commands =="
 TEST_STATUS="passed"
 
-python - <<'PY' > /tmp/task_test_commands.txt
+python3 - <<'PY' > /tmp/task_test_commands.txt
 import json
 from pathlib import Path
 task = json.loads(Path("state/CURRENT_TASK.json").read_text(encoding="utf-8"))
@@ -76,7 +76,7 @@ echo "lint not configured" > "$LINT_OUT"
 echo "build not configured" > "$BUILD_OUT"
 echo "runtime checks not configured" > "$RUNTIME_OUT"
 
-python - <<'PY'
+python3 - <<'PY'
 import json
 from pathlib import Path
 from datetime import datetime, timezone

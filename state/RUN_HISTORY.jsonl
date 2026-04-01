@@ -10,3 +10,8 @@
 {"timestamp": "2026-04-01T12:03:16Z", "node": "update_state", "task_id": null, "result": "no_selectable_task"}
 {"timestamp": "2026-04-01T12:03:20Z", "node": "update_state", "task_id": null, "result": "no_selectable_task"}
 {"timestamp": "2026-04-01T12:03:31Z", "node": "update_state", "task_id": "task_002", "result": "selected_task", "title": "Run broader utility regression test"}
+{"timestamp": "2026-04-01T12:38:59Z", "node": "update_state", "task_id": null, "result": "no_selectable_task"}
+{"timestamp": "2026-04-01T12:39:04Z", "node": "update_state", "task_id": null, "result": "no_selectable_task"}
+{"timestamp": "2026-04-01T12:39:13Z", "node": "update_state", "task_id": null, "result": "no_selectable_task"}
+{"timestamp": "2026-04-01T12:39:14Z", "node": "update_state", "task_id": "task_001", "result": "marked_task_done"}
+{"timestamp": "2026-04-01T12:39:14Z", "node": "update_state", "task_id": null, "result": "remaining_tasks_count", "count": 1}

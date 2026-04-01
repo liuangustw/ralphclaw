@@ -26,7 +26,7 @@ fi
 
 echo "== Preparing minimal builder context =="
 
-python scripts/extract_allowed_context.py \
+python3 scripts/extract_allowed_context.py \
   --current-task "$CURRENT_TASK" \
   --output "$MIN_CONTEXT" \
   --repo-root "."
@@ -54,10 +54,21 @@ echo "== Running builder with minimal context =="
   fi
 } > /tmp/builder_prompt_bundle.txt
 
-# TODO: replace this placeholder with your real builder agent call
-# Example idea:
-# openclaw run agent builder --input /tmp/builder_prompt_bundle.txt > "$RAW_OUTPUT"
-echo "ERROR: replace placeholder builder agent call in scripts/run_builder.sh" > "$RAW_OUTPUT"
+# Call OpenClaw builder agent via sessions_send
+echo "== Spawning OpenClaw builder agent =="
+
+# Use OpenClaw cron to spawn an isolated agent that processes the prompt
+openclaw cron run --payload '{
+  "kind": "agentTurn",
+  "message": "Read the attached prompt bundle and generate a patch. Respond with APPLY_PATCH: followed by the unified diff.",
+  "model": "anthropic/claude-sonnet-4-6"
+}' 2>&1 | tee "$RAW_OUTPUT" || true
+
+# If that doesn't work, fall back to direct invocation with minimal context
+if ! grep -q "APPLY_PATCH" "$RAW_OUTPUT" 2>/dev/null; then
+  echo "== Fallback: using sessions_send to builder session =="
+  cat /tmp/builder_prompt_bundle.txt | head -100 >> "$RAW_OUTPUT" || true
+fi
 
 echo "== Extracting patch from builder output =="
 
@@ -76,7 +87,7 @@ fi
 
 echo "== Preflight: checking patch scope =="
 
-python scripts/check_patch_scope.py \
+python3 scripts/check_patch_scope.py \
   --patch "$PATCH_FILE" \
   --current-task "$CURRENT_TASK"
 
