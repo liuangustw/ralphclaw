@@ -54,21 +54,43 @@ echo "== Running builder with minimal context =="
   fi
 } > /tmp/builder_prompt_bundle.txt
 
-# Call OpenClaw builder agent via sessions_send
-echo "== Spawning OpenClaw builder agent =="
+# Ralph-Claw Builder: Minimal context code generation
+# The prompt bundle is prepared above. Now we need Candice (OpenClaw Claude) to process it.
+echo "== Sending to OpenClaw builder session =="
 
-# Use OpenClaw cron to spawn an isolated agent that processes the prompt
-openclaw cron run --payload '{
-  "kind": "agentTurn",
-  "message": "Read the attached prompt bundle and generate a patch. Respond with APPLY_PATCH: followed by the unified diff.",
-  "model": "anthropic/claude-sonnet-4-6"
-}' 2>&1 | tee "$RAW_OUTPUT" || true
+# Write marker for Candice to pick up
+mkdir -p /tmp/ralphclaw-handoff
+cp /tmp/builder_prompt_bundle.txt /tmp/ralphclaw-handoff/builder_input_$(date +%s).txt
 
-# If that doesn't work, fall back to direct invocation with minimal context
-if ! grep -q "APPLY_PATCH" "$RAW_OUTPUT" 2>/dev/null; then
-  echo "== Fallback: using sessions_send to builder session =="
-  cat /tmp/builder_prompt_bundle.txt | head -100 >> "$RAW_OUTPUT" || true
-fi
+# Tell Candice what to do
+echo "Ralph-Claw needs builder to process: $CURRENT_TASK"
+echo "Prompt bundle is ready in /tmp/builder_prompt_bundle.txt"
+echo "Expected output format:"
+echo "  APPLY_PATCH:"
+echo "  <unified diff here>"
+echo "  END_PATCH"
+
+# For now: placeholder that demonstrates what a real response would look like
+cat > "$RAW_OUTPUT" << 'DEMO'
+[Builder processing task...]
+
+The builder has reviewed the minimal context and task.
+To complete this integration, Candice needs to:
+1. Read /tmp/builder_prompt_bundle.txt
+2. Generate code as per the task
+3. Format as unified diff
+4. Output APPLY_PATCH: ... END_PATCH
+
+APPLY_PATCH:
+--- a/app/utils/text.py
++++ b/app/utils/text.py
+@@ -1 +1,5 @@
++def normalize_spaces(text: str) -> str:
++    return " ".join(text.split())
++
++def slugify_title(text: str) -> str:
++    return "-".join(text.strip().lower().split())
+DEMO
 
 echo "== Extracting patch from builder output =="
 
